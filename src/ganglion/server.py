@@ -125,7 +125,11 @@ class GanglionWebServer:
             return app
 
         uvloop.install()
-        loop = asyncio.get_event_loop()
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
         loop.add_signal_handler(signal.SIGINT, self.request_exit)
         loop.add_signal_handler(signal.SIGTERM, self.request_exit)
         web.run_app(make_app(), port=self.port, handle_signals=False, loop=loop)
